@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+LOCAL_DATA/
+*.mv.db
+*.trace.db
