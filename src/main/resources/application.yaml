@@ -23,3 +23,10 @@ spring:
 
 server:
   port: 8080
+
+app:
+  jwt:
+    secret: "CHANGE_ME_TO_A_LONG_RANDOM_SECRET_32+_CHARS_1234567890"
+    issuer: "greenride"
+    audience: "greenride-api"
+    ttl-minutes: 120

@@ -1,7 +1,6 @@
 package gr.hua.dit.greenride.core.service;
 
 
-
 import gr.hua.dit.greenride.core.model.Ride;
 import gr.hua.dit.greenride.core.model.RideStatus;
 import gr.hua.dit.greenride.core.model.User;
@@ -13,9 +12,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Υλοποίηση των λειτουργιών RideService.
- */
 @Service
 @Transactional
 public class RideServiceImpl implements RideService {
@@ -30,7 +26,6 @@ public class RideServiceImpl implements RideService {
     public Ride createRide(User driver, String origin, String destination,
                            LocalDateTime departureTime, int totalSeats) {
 
-        // Κανόνας: ο οδηγός δεν μπορεί να έχει πάνω από 3 ενεργές διαδρομές
         int activeRides = rideRepository.countByDriverAndStatus(driver, RideStatus.PLANNED);
         if (activeRides >= 3) {
             throw new IllegalStateException("Ο οδηγός έχει ήδη 3 ενεργές διαδρομές!");
@@ -51,7 +46,8 @@ public class RideServiceImpl implements RideService {
     @Override
     public List<Ride> searchRides(String origin, String destination, LocalDateTime afterTime) {
         return rideRepository.findByOriginAndDestinationAndDepartureTimeAfterAndStatus(
-                origin, destination, afterTime, RideStatus.PLANNED);
+                origin, destination, afterTime, RideStatus.PLANNED
+        );
     }
 
     @Override
@@ -64,7 +60,6 @@ public class RideServiceImpl implements RideService {
         Ride ride = rideRepository.findById(rideId)
                 .orElseThrow(() -> new IllegalArgumentException("Η διαδρομή δεν βρέθηκε!"));
 
-        // Αν δεν είναι admin ή ο οδηγός της, δεν επιτρέπεται ακύρωση
         if (!requester.getRole().name().equals("ADMIN")
                 && !ride.getDriver().getId().equals(requester.getId())) {
             throw new SecurityException("Δεν έχετε δικαίωμα ακύρωσης αυτής της διαδρομής!");
