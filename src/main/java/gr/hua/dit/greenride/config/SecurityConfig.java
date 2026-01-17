@@ -28,47 +28,71 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    // ---------------------------
-    //  API: /api/v1/** (JWT, stateless)
-    // ---------------------------
+    // =====================================================
+    // API SECURITY (JWT, stateless) -> /api/v1/**
+    // =====================================================
     @Bean
     @Order(1)
-    public SecurityFilterChain apiChain(HttpSecurity http,
-                                        JwtAuthenticationFilter jwtAuthenticationFilter,
-                                        RestApiAuthenticationEntryPoint entryPoint,
-                                        RestApiAccessDeniedHandler deniedHandler) throws Exception {
+    public SecurityFilterChain apiChain(
+            HttpSecurity http,
+            JwtAuthenticationFilter jwtAuthenticationFilter,
+            RestApiAuthenticationEntryPoint entryPoint,
+            RestApiAccessDeniedHandler deniedHandler
+    ) throws Exception {
+
         http
                 .securityMatcher("/api/v1/**")
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(sm ->
+                        sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
                 .authorizeHttpRequests(auth -> auth
+                        // -------- AUTH --------
                         .requestMatchers("/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/auth/register").permitAll()
+
+                        // -------- SWAGGER --------
+                        .requestMatchers("/v3/api-docs/**").permitAll()
+                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/swagger-ui.html").permitAll()
+
+                        // -------- ADMIN --------
+                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+
+                        // -------- ALL OTHER API --------
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(entryPoint)
                         .accessDeniedHandler(deniedHandler)
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(
+                        jwtAuthenticationFilter,
+                        UsernamePasswordAuthenticationFilter.class
+                )
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable);
 
         return http.build();
     }
 
-    // ---------------------------
-    //  UI: /** (cookie session, form login)
-    // ---------------------------
+    // =====================================================
+    // UI SECURITY (form login, session) -> /**
+    // =====================================================
     @Bean
     @Order(2)
     public SecurityFilterChain uiChain(HttpSecurity http) throws Exception {
+
         http
                 .securityMatcher("/**")
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
-                                "/", "/login", "/register",
-                                "/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**",
+                                "/",
+                                "/login",
+                                "/register",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
                                 "/h2-console/**"
                         ).permitAll()
                         .anyRequest().authenticated()
@@ -87,22 +111,24 @@ public class SecurityConfig {
                         .invalidateHttpSession(true)
                         .permitAll()
                 )
-                // H2 console frames
-                .headers(h -> h.frameOptions(f -> f.disable()));
+                // H2 console needs frames
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
         return http.build();
     }
 
+    // =====================================================
+    // AUTH BEANS
+    // =====================================================
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration cfg) throws Exception {
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration cfg
+    ) throws Exception {
         return cfg.getAuthenticationManager();
     }
 }
-
-
-

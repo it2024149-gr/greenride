@@ -1,6 +1,7 @@
 package gr.hua.dit.greenride.core.repository;
 
 
+
 import gr.hua.dit.greenride.core.model.Ride;
 import gr.hua.dit.greenride.core.model.RideStatus;
 import gr.hua.dit.greenride.core.model.User;

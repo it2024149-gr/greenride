@@ -27,7 +27,6 @@ public class AdminStatsResource {
 
         double avgOcc = rideRepository.averageOccupancyRatioPlanned();
 
-
         return Map.of(
                 "usersCount", userRepository.count(),
                 "ridesCount", rideRepository.count(),
