@@ -27,7 +27,6 @@
 - Maven
 
 ## Build
-```bash
 mvn clean package
 
 ## Εκτέλεση
