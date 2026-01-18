@@ -1,5 +1,6 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="utf-8">
     <title>GreenRide</title>
@@ -18,17 +19,22 @@
             color: #2c3e50;
         }
 
-        .menu a {
+        .menu a, .menu button {
             font-size: 24px;
             margin: 0 15px;
             text-decoration: none;
             color: #007bff;
             font-weight: bold;
+            background: none;
+            border: none;
+            cursor: pointer;
         }
 
-        .menu a:hover {
+        .menu a:hover, .menu button:hover {
             text-decoration: underline;
         }
+
+        form { display: inline; }
     </style>
 </head>
 
@@ -37,11 +43,28 @@
 <h1>GreenRide</h1>
 
 <div class="menu">
-    <a href="/login">Login</a>
-    |
-    <a href="/register">Register</a>
-    |
-    <a href="/swagger-ui/index.html">Swagger</a>
+
+    <!-- Αν ΔΕΝ είσαι logged in -->
+    <div sec:authorize="isAnonymous()">
+        <a href="/login">Login</a>
+        |
+        <a href="/register">Register</a>
+        |
+        <a href="/swagger-ui/index.html">Swagger</a>
+    </div>
+
+    <!-- Αν ΕΙΣΑΙ logged in -->
+    <div sec:authorize="isAuthenticated()">
+        <a href="/profile">Profile</a>
+        |
+        <a href="/swagger-ui/index.html">Swagger</a>
+        |
+        <form th:action="@{/logout}" method="post">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            <button type="submit">Logout</button>
+        </form>
+    </div>
+
 </div>
 
 </body>

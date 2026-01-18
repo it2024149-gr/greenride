@@ -44,6 +44,7 @@ public class BookingServiceImpl implements BookingService {
         booking.setPassenger(passenger);
         booking.setStatus(BookingStatus.CONFIRMED);
 
+        // Μείωση διαθέσιμων θέσεων
         ride.setAvailableSeats(ride.getAvailableSeats() - 1);
         rideRepository.save(ride);
 
@@ -54,22 +55,19 @@ public class BookingServiceImpl implements BookingService {
     public void cancelBooking(Long bookingId, User requester) {
 
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() ->
-                        new IllegalArgumentException("Η κράτηση δεν βρέθηκε!"));
+                .orElseThrow(() -> new IllegalArgumentException("Η κράτηση δεν βρέθηκε!"));
 
         // Δικαίωμα ακύρωσης: ADMIN ή ο ίδιος ο επιβάτης
         if (!requester.getRole().name().equals("ADMIN")
                 && !booking.getPassenger().getId().equals(requester.getId())) {
-            throw new SecurityException(
-                    "Δεν έχετε δικαίωμα ακύρωσης αυτής της κράτησης!");
+            throw new SecurityException("Δεν έχετε δικαίωμα ακύρωσης αυτής της κράτησης!");
         }
 
         // CUT-OFF 10 λεπτών πριν την αναχώρηση (μόνο για μη-admin)
         if (!requester.getRole().name().equals("ADMIN")) {
 
             LocalDateTime now = LocalDateTime.now();
-            LocalDateTime cutoff =
-                    booking.getRide().getDepartureTime().minusMinutes(10);
+            LocalDateTime cutoff = booking.getRide().getDepartureTime().minusMinutes(10);
 
             if (now.isAfter(cutoff)) {
                 throw new IllegalStateException(
@@ -90,6 +88,6 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<Booking> getBookingsByPassenger(User passenger) {
-        return bookingRepository.findByPassenger(passenger);
+        return bookingRepository.findByPassengerWithRide(passenger);
     }
 }
