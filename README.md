@@ -34,6 +34,7 @@ mvn spring-boot:run
 
 ## URLs
 Web UI: http://localhost:8080
+
 Swagger UI: http://localhost:8080/swagger-ui.html
 
 ## Authentication
