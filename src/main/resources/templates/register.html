@@ -1,20 +1,215 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="utf-8"><title>Register</title></head>
+<head>
+    <meta charset="utf-8">
+    <title>Register - GreenRide</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .box {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            width: 360px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 25px;
+            color: #2c3e50;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        .hint {
+            text-align: left;
+            margin-top: -10px;
+            margin-bottom: 12px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #1e7e34;
+        }
+
+        .message {
+            margin-top: 15px;
+            font-size: 14px;
+            font-weight: bold;
+            white-space: pre-line;
+        }
+
+        .message.ok { color: #1e7e34; }
+        .message.err { color: #c0392b; }
+
+        .links {
+            margin-top: 18px;
+        }
+
+        .links a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
 <body>
-<h2>Register</h2>
 
-<p>Για register μέσω API: POST /api/v1/auth/register</p>
+<div class="box">
+    <h2>Register</h2>
 
-<pre>
-{
-  "username": "maria",
-  "password": "123456",
-  "fullName": "Maria Papadopoulou",
-  "email": "maria@mail.com"
-}
-</pre>
+    <form id="regForm" autocomplete="off">
+        <div>
+            <label>Username</label>
+            <input id="username" required autocomplete="off" />
+        </div>
 
-<p><a href="/login">Go to login</a></p>
+        <div>
+            <label>Password</label>
+            <input id="password"
+                   type="password"
+                   required
+                   minlength="6"
+                   autocomplete="new-password" />
+            <div class="hint">Password must be at least 6 characters.</div>
+        </div>
+
+        <div>
+            <label>Full name</label>
+            <input id="fullName" required autocomplete="off" />
+        </div>
+
+        <div>
+            <label>Email</label>
+            <input id="email" type="email" required autocomplete="off" />
+        </div>
+
+        <button type="submit" id="btn">Create account</button>
+    </form>
+
+    <p id="msg" class="message"></p>
+
+    <div class="links">
+        <a href="/login">Go to login</a> |
+        <a href="/">Home</a>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById("regForm");
+    const msg = document.getElementById("msg");
+    const btn = document.getElementById("btn");
+
+    function setMsg(text, type) {
+        msg.className = "message " + (type || "");
+        msg.textContent = text;
+    }
+
+    function parseErrorText(text) {
+        // Προσπαθεί να βγάλει ανθρώπινο μήνυμα από JSON error response
+        try {
+            const obj = JSON.parse(text);
+
+            // Αν υπάρχει message, είναι αρκετό
+            if (obj && obj.message) {
+                // Μικρό "φιλτράρισμα" για validation password
+                if (typeof obj.message === "string" && obj.message.includes("size must be between")) {
+                    return "Password must be at least 6 characters.";
+                }
+                return obj.message;
+            }
+        } catch (e) {
+            // όχι JSON
+        }
+
+        // fallback
+        if (text && text.toLowerCase().includes("size must be between")) {
+            return "Password must be at least 6 characters.";
+        }
+
+        return "Registration failed. Check your inputs and try again.";
+    }
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        btn.disabled = true;
+
+        setMsg("Registering...", "");
+
+        const payload = {
+            username: document.getElementById("username").value.trim(),
+            password: document.getElementById("password").value,
+            fullName: document.getElementById("fullName").value.trim(),
+            email: document.getElementById("email").value.trim()
+        };
+
+        try {
+            const res = await fetch("/api/v1/auth/register", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                setMsg("Registration successful! Redirecting to login...", "ok");
+                form.reset();
+
+                setTimeout(() => {
+                    window.location.href = "/login";
+                }, 1500);
+
+            } else {
+                const text = await res.text();
+                const nice = parseErrorText(text);
+                setMsg(nice, "err");
+            }
+
+        } catch (err) {
+            setMsg("Error connecting to server.", "err");
+        } finally {
+            btn.disabled = false;
+        }
+    });
+</script>
+
 </body>
 </html>

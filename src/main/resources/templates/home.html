@@ -1,9 +1,48 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="utf-8"><title>GreenRide</title></head>
+<head>
+    <meta charset="utf-8">
+    <title>GreenRide</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 80px;
+            background-color: #f8f9fa;
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-bottom: 40px;
+            color: #2c3e50;
+        }
+
+        .menu a {
+            font-size: 24px;
+            margin: 0 15px;
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+        }
+
+        .menu a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
 <body>
-<h2>GreenRide</h2>
-<p><a href="/login">Login</a> | <a href="/register">Register</a> | <a href="/swagger-ui.html">Swagger</a></p>
+
+<h1>GreenRide</h1>
+
+<div class="menu">
+    <a href="/login">Login</a>
+    |
+    <a href="/register">Register</a>
+    |
+    <a href="/swagger-ui/index.html">Swagger</a>
+</div>
+
 </body>
 </html>
-l>

@@ -1,11 +1,48 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="utf-8"><title>Profile</title></head>
+<head>
+    <meta charset="utf-8">
+    <title>Profile - GreenRide</title>
+    <style>
+        body{font-family:Arial,sans-serif;background:#f8f9fa;display:flex;justify-content:center;align-items:center;height:100vh;margin:0}
+        .card{background:#fff;padding:40px;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.12);width:420px;text-align:center}
+        h2{margin:0 0 10px;color:#2c3e50}
+        .ok{margin:12px 0 18px;font-weight:bold;color:#1e7e34}
+        .row{margin:10px 0;text-align:left}
+        .label{font-weight:bold;color:#2c3e50}
+        .btn{display:inline-block;padding:10px 14px;border-radius:6px;text-decoration:none;font-weight:bold}
+        .btn-blue{background:#007bff;color:#fff}
+        .btn-gray{background:#6c757d;color:#fff}
+        .links{margin-top:18px}
+        .links a{color:#007bff;text-decoration:none;font-weight:bold}
+        .links a:hover{text-decoration:underline}
+    </style>
+</head>
 <body>
-<h2>Profile</h2>
-<p>Είσαι logged in ✅</p>
-<form method="post" action="/logout">
-    <button type="submit">Logout</button>
-</form>
+
+<div class="card">
+    <h2>Profile</h2>
+    <div class="ok">Είσαι logged in ✅</div>
+
+    <div class="row">
+        <div class="label">Username:</div>
+        <div th:text="${#authentication.name}">username</div>
+    </div>
+
+    <div class="row">
+        <div class="label">Roles:</div>
+        <div th:text="${#authentication.authorities}">roles</div>
+    </div>
+
+    <div class="links">
+        <a href="/">Home</a> |
+        <a href="/swagger-ui/index.html">Swagger</a>
+    </div>
+
+    <div style="margin-top:18px;">
+        <a class="btn btn-gray" href="/logout">Logout</a>
+    </div>
+</div>
+
 </body>
 </html>

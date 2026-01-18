@@ -1,6 +1,5 @@
 package gr.hua.dit.greenride.core.service;
 
-
 import gr.hua.dit.greenride.core.model.Ride;
 import gr.hua.dit.greenride.core.model.RideStatus;
 import gr.hua.dit.greenride.core.model.User;
@@ -57,12 +56,30 @@ public class RideServiceImpl implements RideService {
 
     @Override
     public void cancelRide(Long rideId, User requester) {
+
         Ride ride = rideRepository.findById(rideId)
                 .orElseThrow(() -> new IllegalArgumentException("Η διαδρομή δεν βρέθηκε!"));
 
+        // Δικαίωμα ακύρωσης: ADMIN ή ο ίδιος ο οδηγός
         if (!requester.getRole().name().equals("ADMIN")
                 && !ride.getDriver().getId().equals(requester.getId())) {
             throw new SecurityException("Δεν έχετε δικαίωμα ακύρωσης αυτής της διαδρομής!");
+        }
+
+        // Επιτρέπεται ακύρωση μόνο αν είναι PLANNED
+        if (ride.getStatus() != RideStatus.PLANNED) {
+            throw new IllegalStateException("Η διαδρομή δεν μπορεί να ακυρωθεί σε αυτή την κατάσταση!");
+        }
+
+        // CUT-OFF 10 λεπτών πριν την αναχώρηση (μόνο για μη-admin)
+        if (!requester.getRole().name().equals("ADMIN")) {
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime cutoff = ride.getDepartureTime().minusMinutes(10);
+
+            if (now.isAfter(cutoff)) {
+                throw new IllegalStateException(
+                        "Δεν επιτρέπεται ακύρωση διαδρομής λιγότερο από 10 λεπτά πριν την αναχώρηση.");
+            }
         }
 
         ride.setStatus(RideStatus.CANCELLED);

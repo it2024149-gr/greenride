@@ -30,3 +30,10 @@ app:
     issuer: "greenride"
     audience: "greenride-api"
     ttl-minutes: 120
+
+weather:
+  base-url: "https://api.openweathermap.org/data/2.5"
+  api-key: "a3771c561d0e6c0f4b6ce471eeda6872"
+  units: "metric"
+  lang: "el"
+

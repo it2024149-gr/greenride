@@ -11,6 +11,7 @@ import gr.hua.dit.greenride.core.repository.RideRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -20,7 +21,8 @@ public class BookingServiceImpl implements BookingService {
     private final BookingRepository bookingRepository;
     private final RideRepository rideRepository;
 
-    public BookingServiceImpl(BookingRepository bookingRepository, RideRepository rideRepository) {
+    public BookingServiceImpl(BookingRepository bookingRepository,
+                              RideRepository rideRepository) {
         this.bookingRepository = bookingRepository;
         this.rideRepository = rideRepository;
     }
@@ -50,16 +52,35 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public void cancelBooking(Long bookingId, User requester) {
-        Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new IllegalArgumentException("Η κράτηση δεν βρέθηκε!"));
 
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Η κράτηση δεν βρέθηκε!"));
+
+        // Δικαίωμα ακύρωσης: ADMIN ή ο ίδιος ο επιβάτης
         if (!requester.getRole().name().equals("ADMIN")
                 && !booking.getPassenger().getId().equals(requester.getId())) {
-            throw new SecurityException("Δεν έχετε δικαίωμα ακύρωσης αυτής της κράτησης!");
+            throw new SecurityException(
+                    "Δεν έχετε δικαίωμα ακύρωσης αυτής της κράτησης!");
         }
 
+        // CUT-OFF 10 λεπτών πριν την αναχώρηση (μόνο για μη-admin)
+        if (!requester.getRole().name().equals("ADMIN")) {
+
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime cutoff =
+                    booking.getRide().getDepartureTime().minusMinutes(10);
+
+            if (now.isAfter(cutoff)) {
+                throw new IllegalStateException(
+                        "Δεν επιτρέπεται ακύρωση κράτησης λιγότερο από 10 λεπτά πριν την αναχώρηση.");
+            }
+        }
+
+        // Ακύρωση κράτησης
         booking.setStatus(BookingStatus.CANCELLED);
 
+        // Επιστροφή θέσης στη διαδρομή
         Ride ride = booking.getRide();
         ride.setAvailableSeats(ride.getAvailableSeats() + 1);
         rideRepository.save(ride);
