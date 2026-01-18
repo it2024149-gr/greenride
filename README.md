@@ -22,11 +22,11 @@
 
 ## Εκτέλεση Εφαρμογής
 
-### Προαπαιτούμενα
+## Προαπαιτούμενα
 - Java 17+
 - Maven
 
-### Build
+## Build
 ```bash
 mvn clean package
 
@@ -41,7 +41,7 @@ Swagger UI: http://localhost:8080/swagger-ui.html
 Web UI: session-based login
 REST API: JWT tokens
 
-##Εξωτερική Υπηρεσία
+## Εξωτερική Υπηρεσία
 Η εφαρμογή χρησιμοποιεί OpenWeather API για την εμφάνιση καιρού
 κατά την ημέρα της διαδρομής.
 
