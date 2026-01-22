@@ -36,6 +36,38 @@
 <p class="msgOk" th:if="${param.canceled}">Ride canceled ✅</p>
 <p class="msgErr" th:if="${msgErr}" th:text="${msgErr}">error</p>
 
+<!-- ✅ Weather card (External API via backend) -->
+<div class="card">
+    <h2>Weather (info)</h2>
+    <div class="small">
+        Fetches current weather via our backend endpoint <b>/api/v1/weather</b> (external Weather API).
+        Use coordinates (lat/lon).
+    </div>
+
+    <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end;">
+        <div style="min-width:180px;">
+            <label>Latitude</label>
+            <input id="wLat" type="number" step="0.0001" placeholder="e.g. 37.9838" />
+        </div>
+
+        <div style="min-width:180px;">
+            <label>Longitude</label>
+            <input id="wLon" type="number" step="0.0001" placeholder="e.g. 23.7275" />
+        </div>
+
+        <div style="margin-top:12px;">
+            <button type="button" onclick="loadWeather()">Get weather</button>
+        </div>
+
+        <div style="margin-top:12px;">
+            <button type="button" class="gray" onclick="presetWeather(37.9838,23.7275)">Athens</button>
+            <button type="button" class="gray" onclick="presetWeather(37.9429,23.6469)">Piraeus</button>
+        </div>
+    </div>
+
+    <div id="weatherBox" class="small" style="margin-top:12px;"></div>
+</div>
+
 <div class="card">
     <h2>Create a ride (Driver)</h2>
 
@@ -130,6 +162,44 @@
         </tbody>
     </table>
 </div>
+
+<script>
+    async function loadWeather() {
+        const latEl = document.getElementById('wLat');
+        const lonEl = document.getElementById('wLon');
+        const box = document.getElementById('weatherBox');
+
+        const lat = (latEl.value || '').trim();
+        const lon = (lonEl.value || '').trim();
+
+        if (!lat || !lon) {
+            box.innerHTML = '<span style="color:#c0392b;font-weight:bold;">Please provide both latitude and longitude.</span>';
+            return;
+        }
+
+        box.textContent = 'Loading...';
+
+        try {
+            const res = await fetch(`/api/v1/weather?lat=${encodeURIComponent(lat)}&lon=${encodeURIComponent(lon)}`);
+            if (!res.ok) {
+                box.innerHTML = `<span style="color:#c0392b;font-weight:bold;">Weather error (HTTP ${res.status}).</span>`;
+                return;
+            }
+
+            const data = await res.json();
+            // expected: { description, tempC, humidity }
+            box.innerHTML = `<b>${data.description}</b> · ${data.tempC}°C · humidity ${data.humidity}%`;
+        } catch (e) {
+            box.innerHTML = '<span style="color:#c0392b;font-weight:bold;">Weather service unavailable.</span>';
+        }
+    }
+
+    function presetWeather(lat, lon) {
+        document.getElementById('wLat').value = lat;
+        document.getElementById('wLon').value = lon;
+        loadWeather();
+    }
+</script>
 
 </body>
 </html>
