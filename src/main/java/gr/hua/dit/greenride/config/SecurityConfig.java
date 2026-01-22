@@ -45,6 +45,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/login").permitAll()
                         .requestMatchers("/api/v1/auth/register").permitAll()
 
+                        // ✅ WEATHER (external API - allow UI fetch without JWT)
+                        .requestMatchers("/api/v1/weather").permitAll()
+
                         // -------- SWAGGER --------
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
